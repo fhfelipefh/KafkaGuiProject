@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group 'com.fhfelipefh'
+
+task ujar(type: Jar) {
+    manifest.attributes(['Main-Class': 'com.fhfelipefh.Main'])
+
+    duplicatesStrategy = 'include'
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.json:json:20220320'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.36'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'org.apache.kafka:connect-transforms:3.2.0'
+    implementation 'org.apache.kafka:connect-api:3.2.0'
+    implementation 'org.apache.kafka:kafka-streams:3.2.0'
+    implementation 'org.apache.kafka:kafka_2.13:3.2.0'
+    implementation 'org.apache.kafka:kafka-clients:3.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
