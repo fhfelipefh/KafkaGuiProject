@@ -38,7 +38,7 @@ public class BasicInterface extends JFrame {
                 JOptionPane.showMessageDialog(frame, "Input JSON is empty or blank");
             } else {
                 jsonObject = jsonConverter.convert(textInput.getText());
-                if (jsonObject.length() > 0) {
+                if (!jsonObject.isEmpty()) {
                     textOutput.setText(jsonObject.toString());
                 } else {
                     textOutput.setText("");

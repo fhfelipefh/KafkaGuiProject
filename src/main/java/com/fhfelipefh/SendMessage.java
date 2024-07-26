@@ -36,7 +36,6 @@ public class SendMessage extends JFrame implements Runnable {
     private JLabel label;
     private JFrame frame = new JFrame("Kafka Producer GUI by fhfelipefh");
 
-
     private void sendMessage() {
         logger.info("SendMessage.sendMessage: Starting...");
         setKafkaProperties();
@@ -95,7 +94,7 @@ public class SendMessage extends JFrame implements Runnable {
         frame.add(panelInput);
         label = new JLabel("Bootstrap Servers: ");
         textFieldBootstrapServers = new JTextField(20);
-        textFieldBootstrapServers.setText("localhost:29092");
+        textFieldBootstrapServers.setText("localhost:9092");
         panelInput.add(label);
         panelInput.add(textFieldBootstrapServers);
         label = new JLabel("Topic: ");
