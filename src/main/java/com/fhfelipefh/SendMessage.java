@@ -33,6 +33,7 @@ public class SendMessage extends JFrame implements Runnable {
     private JPanel panelOutput = new JPanel();
     private JTextField textFieldBootstrapServers;
     private JButton sendButton;
+    private JButton enableReceiveButton;
     private JLabel label;
     private JFrame frame = new JFrame("Kafka Producer GUI by fhfelipefh");
 
@@ -72,7 +73,7 @@ public class SendMessage extends JFrame implements Runnable {
         producer.close();
     }
 
-    private void setKafkaProperties() {
+    public void setKafkaProperties() {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -110,6 +111,7 @@ public class SendMessage extends JFrame implements Runnable {
         panelInput.add(label);
         panelInput.add(textFieldMessage);
         sendButton = new JButton("Send");
+        enableReceiveButton = new JButton("Enable Receive");
         sendButton.addActionListener(e -> {
                     kafkaTopic = textFieldTopic.getText();
                     key = textFieldKey.getText();
@@ -130,7 +132,21 @@ public class SendMessage extends JFrame implements Runnable {
                     }
                 }
         );
+        enableReceiveButton.addActionListener(e -> {
+            kafkaTopic = textFieldTopic.getText();
+            BOOTSTRAP_SERVERS = textFieldBootstrapServers.getText();
+
+            if (kafkaTopic.isBlank() || BOOTSTRAP_SERVERS.isBlank()) {
+                logger.info("SendMessage.enableReceiveButton.actionPerformed: Bootstrap Servers and Topic are required");
+                JOptionPane.showMessageDialog(frame, "Bootstrap Servers and Topic are required");
+                return;
+            }
+
+            Thread threadReceive = new Thread(new ReceiveMessage(BOOTSTRAP_SERVERS, properties, key, kafkaTopic));
+            threadReceive.start();
+        });
         panelInput.add(sendButton);
+        panelInput.add(enableReceiveButton);
         frame.pack();
         setFrameProperties();
     }
