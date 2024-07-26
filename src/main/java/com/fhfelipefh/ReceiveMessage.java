@@ -16,6 +16,7 @@ import java.awt.*;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.Vector;
 
 @Data
 @NoArgsConstructor
@@ -31,13 +32,12 @@ public class ReceiveMessage extends JFrame implements Runnable {
     private String kafkaMessage = "";
     private Properties properties = new Properties();
 
-    private JPanel panelInput = new JPanel();
-    private JPanel panelOutput = new JPanel();
+    private JList<String> messageList;
+    private DefaultListModel<String> listModel;
     private JTextField textFieldBootstrapServers;
     private JButton sendButton;
     private JButton enableReceiveButton;
     private JLabel label;
-    private JFrame frame = new JFrame("Kafka Consumer GUI by fhfelipefh");
 
     public ReceiveMessage(String BOOTSTRAP_SERVERS, Properties properties, String key, String kafkaTopic) {
         this.BOOTSTRAP_SERVERS = BOOTSTRAP_SERVERS;
@@ -51,6 +51,27 @@ public class ReceiveMessage extends JFrame implements Runnable {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-consumer-group");
+
+        // Initialize GUI components
+        initializeGUI();
+    }
+
+    private void initializeGUI() {
+        setTitle("Kafka Consumer GUI by fhfelipefh");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+
+        listModel = new DefaultListModel<>();
+        messageList = new JList<>(listModel);
+        JScrollPane scrollPane = new JScrollPane(messageList);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        add(panel);
+        setVisible(true);
     }
 
     @Override
@@ -62,22 +83,20 @@ public class ReceiveMessage extends JFrame implements Runnable {
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, String> record : records) {
-                    logger.info("Received new record. \n"
-                            + "Key: " + record.key()
-                            + "\n" + "Value: " + record.value()
-                            + "\n" + "Partition: " + record.partition()
-                            + "\n" + "Offset: " + record.offset());
-                    JLabel status = new JLabel("Message received successfully! > " + numberOfMessages);
-                    numberOfMessages++;
-                    status.setForeground(Color.GREEN);
-                    panelOutput.removeAll();
-                    panelOutput.add(status);
-                    panelOutput.setLayout(new FlowLayout(10, 10, 10));
-                    frame.add(panelOutput);
+                    String message = "Key: " + record.key() + ", Value: " + record.value() +
+                            ", Partition: " + record.partition() + ", Offset: " + record.offset();
+                    logger.info("Received new record. " + message);
+                    SwingUtilities.invokeLater(() -> listModel.addElement(message));
                 }
             }
         } catch (Exception e) {
             logger.error("Error in Kafka consumer: ", e);
         }
+    }
+
+    public static void main(String[] args) {
+        Properties properties = new Properties();
+        ReceiveMessage receiveMessage = new ReceiveMessage("localhost:9092", properties, "", "your-kafka-topic");
+        new Thread(receiveMessage).start();
     }
 }
