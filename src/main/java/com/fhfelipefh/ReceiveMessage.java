@@ -16,7 +16,6 @@ import java.awt.*;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
-import java.util.Vector;
 
 @Data
 @NoArgsConstructor
